@@ -30,6 +30,28 @@ app.get("/prints", async (req, res) => {
   }
 });
 
+// Route to get a single print by ID
+app.get("/prints/:id", async (req, res) => {
+  try {
+    const print = await Print.findById(req.params.id);
+    if (!print) {
+      return res.status(404).json({
+        success: false,
+        message: 'Print not found'
+      });
+    }
+    res.json({
+      success: true,
+      print
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
 // POST route
 app.post("/prints", async (req, res) => {
   try {
