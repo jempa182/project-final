@@ -1,10 +1,14 @@
+// src/pages/ProductDetail.jsx
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { useCart } from '../context/CartContext';
 
 const ProductDetail = () => {
   const { id } = useParams();
   const [print, setPrint] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const { addToCart } = useCart(); 
+  const [isAdded, setIsAdded] = useState(false);
 
   useEffect(() => {
     const fetchPrint = async () => {
@@ -23,6 +27,14 @@ const ProductDetail = () => {
 
     fetchPrint();
   }, [id]);
+
+  const handleAddToCart = () => {
+    addToCart(print);
+    setIsAdded(true);
+    setTimeout(() => {
+      setIsAdded(false);
+    }, 1500);
+  };
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -60,8 +72,19 @@ const ProductDetail = () => {
           </div>
 
           {/* Add to Cart Button */}
-          <button className="w-full bg-black text-white py-3 hover:bg-gray-800 transition-colors">
-            ADD TO CART
+          <button 
+            onClick={handleAddToCart}
+            className={`w-full py-3 transition-all duration-300 ${
+              isAdded 
+                ? 'bg-green-500 hover:bg-green-600' 
+                : 'bg-black hover:bg-gray-800'
+            }`}
+          >
+            <span className={`text-white transition-transform duration-300 ${
+              isAdded ? 'inline-block scale-105' : ''
+            }`}>
+              {isAdded ? 'ADDED!' : 'ADD TO CART'}
+            </span>
           </button>
 
           {/* Shipping Information */}
