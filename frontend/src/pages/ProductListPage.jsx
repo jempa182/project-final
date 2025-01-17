@@ -4,14 +4,14 @@ import { Link } from 'react-router-dom';
 
 const ProductListPage = () => {
   const [prints, setPrints] = useState([]);
-  const [isLoading, setIsLoading] = useState(true); // Add loading state
+  const [isLoading, setIsLoading] = useState(true); 
 
   useEffect(() => {
     const fetchPrints = async () => {
       try {
         const response = await fetch('http://localhost:8080/prints');
         const data = await response.json();
-        console.log('API Response:', data); // Let's see what we're getting
+        console.log('API Response:', data); 
         if (data.success) {
           setPrints(data.prints);
         }
