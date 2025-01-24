@@ -9,19 +9,22 @@ const ProductListPage = () => {
   useEffect(() => {
     const fetchPrints = async () => {
       try {
+        console.log('Fetching prints from API...');
         const response = await fetch('http://localhost:8080/prints');
         const data = await response.json();
-        console.log('API Response:', data); 
+        console.log('Complete API Response:', data);
+        console.log('Response data structure:', JSON.stringify(data, null, 2)); // Add this line
         if (data.success) {
+          console.log('Setting prints:', data.prints);
           setPrints(data.prints);
         }
       } catch (error) {
-        console.error('Error fetching prints:', error);
+        console.error('Detailed error:', error);
       } finally {
         setIsLoading(false);
       }
     };
-
+  
     fetchPrints();
   }, []);
 
@@ -35,7 +38,7 @@ const ProductListPage = () => {
 
   return (
     <div className="max-w-[1100px] mx-auto">
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8">
         {prints.map((print) => (
           <Link 
             to={`/products/${print._id}`} 

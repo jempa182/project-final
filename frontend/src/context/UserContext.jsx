@@ -7,6 +7,10 @@ export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem('token'));
 
+  const updateUser = (userData) => {
+    setUser(userData);
+  };
+
   const login = async (email, password) => {
     try {
       const response = await fetch('http://localhost:8080/login', {
@@ -39,7 +43,13 @@ export const UserProvider = ({ children }) => {
   };
 
   return (
-    <UserContext.Provider value={{ user, token, login, logout }}>
+    <UserContext.Provider value={{ 
+      user, 
+      token, 
+      login, 
+      logout,
+      updateUser
+    }}>
       {children}
     </UserContext.Provider>
   );

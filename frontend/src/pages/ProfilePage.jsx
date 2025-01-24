@@ -2,9 +2,34 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
+import { useState } from 'react';
+import AddressForm from '../components/AddressForm';
 
 const ProfilePage = () => {
-  const { user } = useUser();
+
+  const { user, updateUser } = useUser();
+  const [showAddressForm, setShowAddressForm] = useState(false);
+
+  const handleSaveAddress = async (address) => {
+    try {
+      const response = await fetch('http://localhost:8080/user/address', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({ shippingAddress: address })
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        updateUser(data.user);
+        setShowAddressForm(false);
+      }
+    } catch (error) {
+      console.error('Error saving address:', error);
+    }
+  };
 
   return (
     <div className="max-w-2xl mx-auto">
@@ -28,9 +53,34 @@ const ProfilePage = () => {
       {/* Shipping Address */}
       <div className="bg-white p-6 rounded-lg border mb-6">
         <h2 className="text-xl mb-4">Shipping Address</h2>
-        <button className="text-sm text-black underline">
-          + Add shipping address
-        </button>
+        {showAddressForm ? (
+          <AddressForm
+            onSave={handleSaveAddress}
+            onCancel={() => setShowAddressForm(false)}
+            existingAddress={user.shippingAddress}
+          />
+        ) : user.shippingAddress ? (
+          <div className="space-y-2">
+            <p>{user.shippingAddress.firstName} {user.shippingAddress.lastName}</p>
+            <p>{user.shippingAddress.street}</p>
+            <p>{user.shippingAddress.zipCode} {user.shippingAddress.city}</p>
+            <p>{user.shippingAddress.country}</p>
+            <p>{user.shippingAddress.phone}</p>
+            <button 
+              onClick={() => setShowAddressForm(true)}
+              className="text-sm text-black underline mt-4"
+            >
+              Edit address
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={() => setShowAddressForm(true)}
+            className="text-sm text-black underline"
+          >
+            + Add shipping address
+          </button>
+        )}
       </div>
 
       {/* Order History */}
@@ -46,7 +96,7 @@ const ProfilePage = () => {
         </Link>
       </div>
 
-      {/* Additional suggestions */}
+      {/* Preferences */}
       <div className="bg-white p-6 rounded-lg border mt-6">
         <h2 className="text-xl mb-4">Preferences</h2>
         <div className="space-y-4">
