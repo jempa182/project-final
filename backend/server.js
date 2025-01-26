@@ -7,15 +7,16 @@ import bcrypt from 'bcrypt';
 import { Print } from './models/Print';
 import { User } from './models/User';
 
-const mongoUrl = process.env.MONGO_URL || "mongodb://localhost/final-project";
-mongoose.connect(mongoUrl);
-mongoose.Promise = Promise;
-
 const port = process.env.PORT || 8080;
 const app = express();
 
 app.use(cors());
 app.use(express.json());
+
+
+const mongoUrl = process.env.MONGO_URL || "mongodb://localhost/final-project";
+mongoose.connect(mongoUrl);
+mongoose.Promise = Promise;
 
 // Authentication Routes
 app.post("/signup", async (req, res) => {
@@ -108,6 +109,23 @@ app.post("/login", async (req, res) => {
  }
 });
 
+app.post("/check-email", async (req, res) => {
+  try {
+    const { email } = req.body;
+    const existingUser = await User.findOne({ email });
+    
+    res.json({
+      success: true,
+      exists: !!existingUser
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
 // Middleware to protect routes
 const authenticateUser = async (req, res, next) => {
  try {
@@ -132,6 +150,34 @@ const authenticateUser = async (req, res, next) => {
    });
  }
 };
+
+//address
+app.put("/user/address", authenticateUser, async (req, res) => {
+  try {
+    const { shippingAddress } = req.body;
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      { shippingAddress },
+      { new: true }
+    );
+
+    res.json({
+      success: true,
+      user: {
+        id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        shippingAddress: user.shippingAddress
+      }
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
 
 // Test route to get all prints 
 app.get("/prints", async (req, res) => {

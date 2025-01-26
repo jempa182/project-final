@@ -7,31 +7,56 @@ const prints = [
     name: "Print 1 - Name",
     price: 253,
     description: "Hello! This is a description about the print.",
-    imageUrl: "/assets/print-example-image.jpeg",
+    mainImage: "/assets/print-example-image.jpeg",
+    additionalImages: [
+      "/assets/print-example-image2.jpeg",
+      "/assets/print-example-image.jpeg",
+      "/assets/print-example-image.jpeg"
+    ]
   },
   {
     name: "Print 2 - Name",
     price: 253,
     description: "This is a description about the print.",
-    imageUrl: "/assets/print-example-image.jpeg",
+    mainImage: "/assets/print-example-image.jpeg",
+    additionalImages: [
+      "/assets/print-example-image2.jpeg",
+      "/assets/print-example-image.jpeg",
+      "/assets/print-example-image.jpeg"
+    ]
   },
   {
     name: "Print 3 - Name",
     price: 253,
     description: "This is a description about the print.",
-    imageUrl: "/assets/print-example-image.jpeg",
+    mainImage: "/assets/print-example-image.jpeg",
+    additionalImages: [
+      "/assets/print-example-image2.jpeg",
+      "/assets/print-example-image.jpeg",
+      "/assets/print-example-image.jpeg"
+    ]
   },
   {
     name: "Print 4 - Name",
     price: 253,
     description: "This is a description about the print.",
-    imageUrl: "/assets/print-example-image.jpeg",
+    mainImage: "/assets/print-example-image.jpeg",
+    additionalImages: [
+      "/assets/print-example-image2.jpeg",
+      "/assets/print-example-image.jpeg",
+      "/assets/print-example-image.jpeg"
+    ]
   },
   {
     name: "Print 5 - Name",
     price: 253,
     description: "This is a description about the print.",
-    imageUrl: "/assets/print-example-image.jpeg",
+    mainImage: "/assets/print-example-image.jpeg",
+    additionalImages: [
+      "/assets/print-example-image2.jpeg",
+      "/assets/print-example-image.jpeg",
+      "/assets/print-example-image.jpeg"
+    ]
   }
   // Add more prints here
 ];

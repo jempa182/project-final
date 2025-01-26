@@ -4,27 +4,27 @@ import mongoose from "mongoose";
 const PrintSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: true,
+    required: true
   },
   price: {
     type: Number,
-    required: true,
+    required: true
   },
   description: {
     type: String,
-    required: true,
+    required: true
   },
-  imageUrl: {
+  mainImage: {
     type: String,
-    required: true,
+    required: true
+  },
+  additionalImages: {
+    type: [String],
+    default: []
   },
   stock: {
     type: Number,
     default: 1
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now
   }
 });
 
