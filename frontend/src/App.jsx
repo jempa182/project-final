@@ -5,6 +5,7 @@ import { UserProvider } from './context/UserContext';
 import Layout from './components/Layout';
 import ProductListPage from './pages/ProductListPage';
 import ProductDetail from './pages/ProductDetail';
+import AboutPage from './pages/AboutPage';
 import LoginPage from './pages/LoginPage';
 import CartPage from './pages/CartPage';
 import ProfilePage from './pages/ProfilePage';
@@ -20,6 +21,7 @@ function App() {
             <Routes>
             <Route path="/" element={<ProductListPage />} />
             <Route path="/products/:id" element={<ProductDetail />} />
+            <Route path="/about" element={<AboutPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/cart" element={<CartPage />} />
             <Route path="/profile" element={<ProfilePage />} />

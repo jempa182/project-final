@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
 import { useCart } from '../context/CartContext';
+import Footer from './Footer';
 
 const Layout = ({ children }) => {
   const { user, logout } = useUser();
@@ -15,18 +16,21 @@ const Layout = ({ children }) => {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-[#FFF9F0]">
       <header className="border-b relative">
         <div className="container mx-auto px-6 py-4 flex justify-between items-center">
           <Link to="/" className="text-xl">
             <img 
               src="/assets/jenny-logo.png"
               alt="Jenny Andersén"
-              className="h-8 w-auto"
+              className="h-14 w-auto"
             />
           </Link>
           
-          <nav className="flex items-center space-x-8">
+          <nav className="flex items-center space-x-8 font-custom">
+          <Link to="/about" className="text-gray-800 hover:text-gray-600 text-sm">
+            ABOUT
+          </Link>
             <div className="relative">
               <button 
                 onClick={() => user && setShowDropdown(!showDropdown)}
@@ -73,6 +77,8 @@ const Layout = ({ children }) => {
       <main className="container mx-auto px-6 py-8">
         {children}
       </main>
+
+      <Footer />
     </div>
   );
 };

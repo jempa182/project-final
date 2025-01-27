@@ -1,3 +1,18 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@font-face {
+  font-family: 'Tan-Meringue';
+  src: url('/fonts/tan-meringue-webfont.woff2') format('woff2'),
+       url('/fonts/tan-meringue-webfont.woff') format('woff'),
+}
+
+h1, h2 {
+  font-family: 'Tan-Meringue', sans-serif;
+}
+
+p {
+  font-family: "Work Sans", serif;
+  font-weight: 300;
+}

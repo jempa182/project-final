@@ -32,7 +32,7 @@ const CartPage = () => {
           {cart.map((item) => (
             <div key={item._id} className="flex gap-4 p-4 border">
               <img 
-                src={item.imageUrl}
+                src={item.mainImage}
                 alt={item.name}
                 className="w-24 h-24 object-cover"
               />

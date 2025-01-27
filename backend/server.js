@@ -295,6 +295,50 @@ app.delete("/prints/:id", async (req, res) => {
  }
 });
 
+// Add favorite
+app.post("/favorites/:printId", authenticateUser, async (req, res) => {
+  try {
+    const { printId } = req.params;
+    const user = req.user;
+
+    if (user.favorites.includes(printId)) {
+      // Remove from favorites
+      user.favorites = user.favorites.filter(id => id.toString() !== printId);
+    } else {
+      // Add to favorites
+      user.favorites.push(printId);
+    }
+
+    await user.save();
+
+    res.json({
+      success: true,
+      favorites: user.favorites
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Get favorites
+app.get("/favorites", authenticateUser, async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).populate('favorites');
+    res.json({
+      success: true,
+      favorites: user.favorites
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
 // Protected route example
 app.get("/user/profile", authenticateUser, async (req, res) => {
  res.json({

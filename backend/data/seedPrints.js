@@ -10,7 +10,7 @@ const prints = [
     mainImage: "/assets/print-example-image.jpeg",
     additionalImages: [
       "/assets/print-example-image2.jpeg",
-      "/assets/print-example-image.jpeg",
+      "/assets/print-example-image3.jpeg",
       "/assets/print-example-image.jpeg"
     ]
   },
@@ -21,7 +21,7 @@ const prints = [
     mainImage: "/assets/print-example-image.jpeg",
     additionalImages: [
       "/assets/print-example-image2.jpeg",
-      "/assets/print-example-image.jpeg",
+      "/assets/print-example-image3.jpeg",
       "/assets/print-example-image.jpeg"
     ]
   },
@@ -32,7 +32,7 @@ const prints = [
     mainImage: "/assets/print-example-image.jpeg",
     additionalImages: [
       "/assets/print-example-image2.jpeg",
-      "/assets/print-example-image.jpeg",
+      "/assets/print-example-image3.jpeg",
       "/assets/print-example-image.jpeg"
     ]
   },
@@ -43,7 +43,7 @@ const prints = [
     mainImage: "/assets/print-example-image.jpeg",
     additionalImages: [
       "/assets/print-example-image2.jpeg",
-      "/assets/print-example-image.jpeg",
+      "/assets/print-example-image3.jpeg",
       "/assets/print-example-image.jpeg"
     ]
   },
@@ -54,7 +54,62 @@ const prints = [
     mainImage: "/assets/print-example-image.jpeg",
     additionalImages: [
       "/assets/print-example-image2.jpeg",
-      "/assets/print-example-image.jpeg",
+      "/assets/print-example-image3.jpeg",
+      "/assets/print-example-image.jpeg"
+    ]
+  },
+  {
+    name: "Print 6 - Name",
+    price: 253,
+    description: "This is a description about the print.",
+    mainImage: "/assets/print-example-image.jpeg",
+    additionalImages: [
+      "/assets/print-example-image2.jpeg",
+      "/assets/print-example-image3.jpeg",
+      "/assets/print-example-image.jpeg"
+    ]
+  },
+  {
+    name: "Print 7 - Name",
+    price: 253,
+    description: "This is a description about the print.",
+    mainImage: "/assets/print-example-image.jpeg",
+    additionalImages: [
+      "/assets/print-example-image2.jpeg",
+      "/assets/print-example-image3.jpeg",
+      "/assets/print-example-image.jpeg"
+    ]
+  },
+  {
+    name: "Print 8 - Name",
+    price: 253,
+    description: "This is a description about the print.",
+    mainImage: "/assets/print-example-image.jpeg",
+    additionalImages: [
+      "/assets/print-example-image2.jpeg",
+      "/assets/print-example-image3.jpeg",
+      "/assets/print-example-image.jpeg"
+    ]
+  },
+  {
+    name: "Print 9 - Name",
+    price: 253,
+    description: "This is a description about the print.",
+    mainImage: "/assets/print-example-image.jpeg",
+    additionalImages: [
+      "/assets/print-example-image2.jpeg",
+      "/assets/print-example-image3.jpeg",
+      "/assets/print-example-image.jpeg"
+    ]
+  },
+  {
+    name: "Print 10 - Name",
+    price: 253,
+    description: "This is a description about the print.",
+    mainImage: "/assets/print-example-image.jpeg",
+    additionalImages: [
+      "/assets/print-example-image2.jpeg",
+      "/assets/print-example-image3.jpeg",
       "/assets/print-example-image.jpeg"
     ]
   }
