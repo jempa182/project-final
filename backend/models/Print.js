@@ -6,6 +6,11 @@ const PrintSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  category: {
+    type: String,
+    required: true,
+    enum: ['Art Prints', 'T-shirts', 'Accessories', 'Stickers']
+  },
   price: {
     type: Number,
     required: true

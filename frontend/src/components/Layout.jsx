@@ -41,29 +41,36 @@ const Layout = ({ children }) => {
                   alt="Profile"
                   className="w-4 h-4"
                 />
-                {user ? user.firstName : (
+                {user ? user.firstName.toUpperCase() : (
                   <Link to="/login">LOGIN</Link>
                 )}
               </button>
 
-              {/* Dropdown Menu */}
-              {showDropdown && user && (
-                <div className="absolute right-0 mt-2 w-48 bg-white border rounded-md shadow-lg py-1 z-10">
-                  <Link
-                    to="/profile"
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    onClick={() => setShowDropdown(false)}
-                  >
-                    Profile
-                  </Link>
-                  <button
-                    onClick={handleLogout}
-                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                  >
-                    Logout
-                  </button>
-                </div>
-              )}
+          {/* Dropdown Menu */}
+          {showDropdown && user && (
+            <div className="absolute right-0 mt-2 w-48 bg-white border rounded-md shadow-lg py-1 z-10">
+              <Link
+                to="/profile"
+                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                onClick={() => setShowDropdown(false)}
+              >
+                Profile
+              </Link>
+              <Link
+                to="/favorites"
+                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                onClick={() => setShowDropdown(false)}
+              >
+                My Favorites
+              </Link>
+              <button
+                onClick={handleLogout}
+                className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+              >
+                Logout
+              </button>
+            </div>
+          )}
             </div>
             <Link 
               to="/cart" 

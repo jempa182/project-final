@@ -2,6 +2,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import { useNavigate } from 'react-router-dom';
+import { useUser } from '../context/UserContext';
+import { Heart } from 'lucide-react';
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -10,6 +13,9 @@ const ProductDetail = () => {
   const [currentImage, setCurrentImage] = useState('');
   const { addToCart } = useCart();
   const [isAdded, setIsAdded] = useState(false);
+  const { user } = useUser();
+  const navigate = useNavigate();
+  const [isFavorite, setIsFavorite] = useState(false);
 
   const handleAddToCart = () => {
     addToCart(print);
@@ -37,6 +43,50 @@ const ProductDetail = () => {
 
     fetchPrint();
   }, [id]);
+
+  useEffect(() => {
+    const checkFavorite = async () => {
+      if (user) {
+        try {
+          const response = await fetch('http://localhost:8080/favorites', {
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+          });
+          const data = await response.json();
+          if (data.success) {
+            setIsFavorite(data.favorites.some(fav => fav._id === id));
+          }
+        } catch (error) {
+          console.error('Error checking favorites:', error);
+        }
+      }
+    };
+    checkFavorite();
+  }, [user, id]);
+
+  const toggleFavorite = async () => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+    
+    try {
+      const response = await fetch(`http://localhost:8080/favorites/${id}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      
+      if (response.ok) {
+        setIsFavorite(!isFavorite);
+      }
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+    }
+  };
 
   if (isLoading) return <div>Loading...</div>;
   if (!print) return <div>Print not found</div>;
@@ -78,9 +128,21 @@ const ProductDetail = () => {
 
         {/* Right side - Product Info */}
         <div className="space-y-8 py-4">
-          <div>
-            <h1 className="text-2xl mb-2">{print.name}</h1>
-            <p className="text-xl">{print.price} kr</p>
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-2xl mb-2">{print.name}</h1>
+              <p className="text-xl">{print.price} kr</p>
+            </div>
+            <button 
+              onClick={toggleFavorite}
+              className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+            >
+              <Heart 
+                className={`w-6 h-6 ${
+                  isFavorite ? 'fill-red-500 stroke-red-500' : ''
+                }`}
+              />
+            </button>
           </div>
 
           <div>

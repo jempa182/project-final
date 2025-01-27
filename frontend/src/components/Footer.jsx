@@ -11,7 +11,6 @@ const Footer = () => {
          <div className="flex flex-row justify-start space-x-6 order-2 md:order-1 font-custom">
            <Link to="/" className="hover:opacity-80">HOME</Link>
            <Link to="/about" className="hover:opacity-80">ABOUT</Link>
-           <Link to="/contact" className="hover:opacity-80">CONTACT</Link>
          </div>
 
          {/* Center Column */}
