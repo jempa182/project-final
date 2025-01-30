@@ -1,0 +1,25 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+  base = "frontend"
+
+[[headers]]
+  for = "/*.js"
+  [headers.values]
+    Content-Type = "application/javascript"
+
+[[headers]]
+  for = "/*.mjs"
+  [headers.values]
+    Content-Type = "application/javascript"
+
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Content-Type = "application/javascript"
+
+# Add a general fallback for other assets
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
