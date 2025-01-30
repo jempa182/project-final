@@ -26,7 +26,7 @@ const LoginPage = () => {
      }
    } else {
      try {
-       const response = await fetch('http://localhost:8080/signup', {
+       const response = await fetch('http://localhost:8080/auth/signup', {
          method: 'POST',
          headers: {
            'Content-Type': 'application/json',

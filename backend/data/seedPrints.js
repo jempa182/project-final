@@ -175,7 +175,7 @@ const prints = [
 ];
 
 // Connect to MongoDB
-mongoose.connect('mongodb://localhost/final-project')
+mongoose.connect('mongodb+srv://jempa182:NjzFCota9q0e9Oy8@cluster0.1aoha.mongodb.net/project-mongodb?retryWrites=true&w=majority&appName=Cluster0')
   .then(async () => {
     console.log('Connected to MongoDB');
     

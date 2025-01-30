@@ -1,11 +1,76 @@
 // src/pages/CheckoutPage.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { loadStripe } from '@stripe/stripe-js';
+import {
+  Elements,
+  PaymentElement,
+  useStripe,
+  useElements
+} from '@stripe/react-stripe-js';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
 import { useCart } from '../context/CartContext';
 
+// --- NEW STRIPE INITIALIZATION ---
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
+
+// --- NEW PAYMENT FORM COMPONENT ---
+const PaymentForm = () => {
+  const stripe = useStripe();
+  const elements = useElements();
+  const [error, setError] = useState(null);
+  const [processing, setProcessing] = useState(false);
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!stripe || !elements) return;
+
+    setProcessing(true);
+    setError(null);
+
+    const { error: submitError } = await elements.submit();
+    if (submitError) {
+      setError(submitError.message);
+      setProcessing(false);
+      return;
+    }
+
+    const { error: paymentError } = await stripe.confirmPayment({
+      elements,
+      confirmParams: {
+        return_url: `${window.location.origin}/order-confirmation`,
+      },
+    });
+
+    if (paymentError) {
+      setError(paymentError.message);
+    }
+    setProcessing(false);
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <PaymentElement />
+      {error && (
+        <div className="text-red-500 text-sm">{error}</div>
+      )}
+      <button
+        type="submit"
+        disabled={!stripe || processing}
+        className={`w-full bg-black text-white py-3 rounded ${
+          processing ? 'opacity-50' : 'hover:bg-gray-800'
+        }`}
+      >
+        {processing ? 'Processing...' : 'Pay Now'}
+      </button>
+    </form>
+  );
+};
+
+// Main CheckoutPage Component
 const CheckoutPage = () => {
-  const [step, setStep] = useState('initial'); // Changed from 'email' to 'initial'
+  const [step, setStep] = useState('initial');
   const [email, setEmail] = useState('');
   const [shippingInfo, setShippingInfo] = useState({
     firstName: '',
@@ -17,10 +82,28 @@ const CheckoutPage = () => {
     phone: ''
   });
   
-  const { user } = useUser();
+  const [clientSecret, setClientSecret] = useState('');
+  
+  const { user } = useUser();  // Make sure this line exists
   const { cart } = useCart();
   const navigate = useNavigate();
   const [showLoginChoice, setShowLoginChoice] = useState(false);
+
+  // Add this useEffect right after your state declarations
+  useEffect(() => {
+    if (user) {
+      setStep('shipping');
+      // Optionally pre-fill shipping info if you have user's details
+      if (user.firstName) {
+        setShippingInfo(prevInfo => ({
+          ...prevInfo,
+          firstName: user.firstName || '',
+          lastName: user.lastName || '',
+          email: user.email || ''
+        }));
+      }
+    }
+  }, [user]);
 
   const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   const shipping = 49;
@@ -29,7 +112,7 @@ const CheckoutPage = () => {
   const handleEmailSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch(`http://localhost:8080/check-email`, {
+      const response = await fetch(`http://localhost:8080/auth/check-email`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -49,9 +132,30 @@ const CheckoutPage = () => {
     }
   };
 
+  // --- UPDATED handleShippingSubmit with Stripe Integration ---
   const handleShippingSubmit = async (e) => {
     e.preventDefault();
-    setStep('payment');
+    try {
+      const response = await fetch('http://localhost:8080/orders/create-payment-intent', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify({
+          items: cart,
+          shippingAddress: shippingInfo,
+        }),
+      });
+
+      const data = await response.json();
+      if (data.clientSecret) {
+        setClientSecret(data.clientSecret);
+        setStep('payment');
+      }
+    } catch (error) {
+      console.error('Error creating payment:', error);
+    }
   };
 
   return (
@@ -266,6 +370,27 @@ const CheckoutPage = () => {
                   Continue to Payment
                 </button>
               </form>
+            </div>
+          )}
+
+          {/* --- NEW PAYMENT SECTION --- */}
+          {step === 'payment' && clientSecret && (
+            <div className="bg-white p-6 border rounded-lg">
+              <h2 className="text-xl mb-4">Payment Information</h2>
+              <Elements 
+                stripe={stripePromise} 
+                options={{
+                  clientSecret,
+                  appearance: {
+                    theme: 'stripe',
+                    variables: {
+                      colorPrimary: '#000000',
+                    },
+                  },
+                }}
+              >
+                <PaymentForm />
+              </Elements>
             </div>
           )}
         </div>

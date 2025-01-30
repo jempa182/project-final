@@ -1,387 +1,79 @@
+// server.js
 import express from "express";
 import cors from "cors";
-import mongoose from "mongoose";
-import jwt from 'jsonwebtoken';
-import bcrypt from 'bcrypt';
-import { Print } from './models/Print';
-import { User } from './models/User';
+import { Order } from './models/Order.js';
 
-const port = process.env.PORT || 8080;
+// Import routes
+import authRoutes from './routes/auth.js';
+import printRoutes from './routes/prints.js';
+import orderRoutes from './routes/orders.js';
+import favoriteRoutes from './routes/favorites.js';
+import userRoutes from './routes/users.js';
+
+// Import configurations
+import { 
+  serverConfig,
+  stripe, 
+  stripeConfig,
+  connectToDatabase
+} from './config/index.js';
+
 const app = express();
+const { port } = serverConfig;
 
+// Stripe webhook handler - needs raw body, so must be before express.json middleware
+app.post("/webhook", express.raw({ type: 'application/json' }), async (req, res) => {
+  const sig = req.headers['stripe-signature'];
+  let event;
+
+  try {
+    event = stripe.webhooks.constructEvent(
+      req.body,
+      sig,
+      stripeConfig.webhookSecret
+    );
+  } catch (err) {
+    console.error('Webhook Error:', err.message);
+    return res.status(400).send(`Webhook Error: ${err.message}`);
+  }
+
+  if (event.type === 'payment_intent.succeeded') {
+    const paymentIntent = event.data.object;
+    const orderId = paymentIntent.metadata.orderId;
+
+    try {
+      await Order.findByIdAndUpdate(orderId, {
+        status: 'paid'
+      });
+    } catch (error) {
+      console.error('Order Update Error:', error);
+      return res.status(500).end();
+    }
+  }
+
+  res.json({ received: true });
+});
+
+// Middleware
 app.use(cors());
 app.use(express.json());
 
-const mongoUrl = process.env.MONGO_URL || "mongodb://localhost/final-project";
-mongoose.connect(mongoUrl);
-mongoose.Promise = Promise;
+// Connect to database
+connectToDatabase();
 
-// Authentication Routes
-app.post("/signup", async (req, res) => {
-  try {
-    const { firstName, lastName, email, password } = req.body;
-    
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({
-        success: false,
-        message: "Email already registered"
-      });
-    }
+// Mount all routes
+app.use('/auth', authRoutes);
+app.use('/prints', printRoutes);
+app.use('/orders', orderRoutes);
+app.use('/favorites', favoriteRoutes);
+app.use('/users', userRoutes);
 
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-
-    const user = await User.create({
-      firstName,
-      lastName,
-      email,
-      password: hashedPassword
-    });
-
-    const token = jwt.sign(
-      { userId: user._id }, 
-      'your-secret-key',
-      { expiresIn: '24h' }
-    );
-
-    res.json({
-      success: true,
-      token,
-      user: {
-        id: user._id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email
-      }
-    });
-  } catch (error) {
-    res.status(400).json({
-      success: false,
-      error: error.message
-    });
-  }
-});
-
-app.post("/login", async (req, res) => {
-  try {
-    const { email, password } = req.body;
-
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(400).json({
-        success: false,
-        message: "User not found"
-      });
-    }
-
-    const validPassword = await bcrypt.compare(password, user.password);
-    if (!validPassword) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid password"
-      });
-    }
-
-    const token = jwt.sign(
-      { userId: user._id },
-      'your-secret-key',
-      { expiresIn: '24h' }
-    );
-
-    res.json({
-      success: true,
-      token,
-      user: {
-        id: user._id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email
-      }
-    });
-  } catch (error) {
-    res.status(400).json({
-      success: false,
-      error: error.message
-    });
-  }
-});
-
-app.post("/check-email", async (req, res) => {
-  try {
-    const { email } = req.body;
-    const existingUser = await User.findOne({ email });
-    
-    res.json({
-      success: true,
-      exists: !!existingUser
-    });
-  } catch (error) {
-    res.status(400).json({
-      success: false,
-      error: error.message
-    });
-  }
-});
-
-// Middleware to protect routes
-const authenticateUser = async (req, res, next) => {
-  try {
-    const token = req.header('Authorization')?.replace('Bearer ', '');
-    if (!token) {
-      throw new Error();
-    }
-
-    const decoded = jwt.verify(token, 'your-secret-key');
-    const user = await User.findById(decoded.userId);
-    
-    if (!user) {
-      throw new Error();
-    }
-
-    req.user = user;
-    next();
-  } catch (error) {
-    res.status(401).json({
-      success: false,
-      message: "Please authenticate"
-    });
-  }
-};
-
-//address
-app.put("/user/address", authenticateUser, async (req, res) => {
-  try {
-    const { shippingAddress } = req.body;
-    const user = await User.findByIdAndUpdate(
-      req.user._id,
-      { shippingAddress },
-      { new: true }
-    );
-
-    res.json({
-      success: true,
-      user: {
-        id: user._id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        shippingAddress: user.shippingAddress
-      }
-    });
-  } catch (error) {
-    res.status(400).json({
-      success: false,
-      error: error.message
-    });
-  }
-});
-
-// Updated route to get all prints with category
-app.get("/prints", async (req, res) => {
-  try {
-    // Add .lean() to get plain JavaScript objects
-    const prints = await Print.find().lean();
-    console.log('Print categories:', prints.map(p => p.category)); // Debug log
-    res.json({
-      success: true,
-      prints
-    });
-  } catch (error) {
-    res.status(400).json({
-      success: false,
-      error: error.message
-    });
-  }
-});
-
-// Route to get a single print by ID
-app.get("/prints/:id", async (req, res) => {
-  try {
-    const print = await Print.findById(req.params.id).select('+category');
-    if (!print) {
-      return res.status(404).json({
-        success: false,
-        message: 'Print not found'
-      });
-    }
-    res.json({
-      success: true,
-      print
-    });
-  } catch (error) {
-    res.status(400).json({
-      success: false,
-      error: error.message
-    });
-  }
-});
-
-// Updated POST route for prints including category
-app.post("/prints", async (req, res) => {
-  try {
-    const { name, price, description, imageUrl, category } = req.body;
-    const newPrint = await Print.create({
-      name,
-      price,
-      description,
-      imageUrl,
-      category
-    });
-    res.json({
-      success: true,
-      print: newPrint
-    });
-  } catch (error) {
-    res.status(400).json({
-      success: false,
-      error: error.message
-    });
-  }
-});
-
-// Updated route to update a print including category
-app.put("/prints/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { name, price, description, imageUrl, category } = req.body;
-    
-    const updatedPrint = await Print.findByIdAndUpdate(
-      id,
-      { name, price, description, imageUrl, category },
-      { new: true }
-    ).select('+category');
-    
-    if (!updatedPrint) {
-      return res.status(404).json({
-        success: false,
-        message: "Print not found"
-      });
-    }
-    
-    res.json({
-      success: true,
-      print: updatedPrint
-    });
-  } catch (error) {
-    res.status(400).json({
-      success: false,
-      error: error.message
-    });
-  }
-});
-
-// Route to delete a print
-app.delete("/prints/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-    const deletedPrint = await Print.findByIdAndDelete(id);
-    
-    if (!deletedPrint) {
-      return res.status(404).json({
-        success: false,
-        message: "Print not found"
-      });
-    }
-    
-    res.json({
-      success: true,
-      message: "Print successfully deleted"
-    });
-  } catch (error) {
-    res.status(400).json({
-      success: false,
-      error: error.message
-    });
-  }
-});
-
-// Add favorite
-app.post("/favorites/:printId", authenticateUser, async (req, res) => {
-  try {
-    const { printId } = req.params;
-    const user = req.user;
-
-    if (user.favorites.includes(printId)) {
-      // Remove from favorites
-      user.favorites = user.favorites.filter(id => id.toString() !== printId);
-    } else {
-      // Add to favorites
-      user.favorites.push(printId);
-    }
-
-    await user.save();
-
-    res.json({
-      success: true,
-      favorites: user.favorites
-    });
-  } catch (error) {
-    res.status(400).json({
-      success: false,
-      error: error.message
-    });
-  }
-});
-
-// Get favorites
-app.get("/favorites", authenticateUser, async (req, res) => {
-  try {
-    const user = await User.findById(req.user._id).populate('favorites');
-    res.json({
-      success: true,
-      favorites: user.favorites
-    });
-  } catch (error) {
-    res.status(400).json({
-      success: false,
-      error: error.message
-    });
-  }
-});
-
-// Protected route example
-app.get("/user/profile", authenticateUser, async (req, res) => {
-  res.json({
-    success: true,
-    user: {
-      id: req.user._id,
-      firstName: req.user.firstName,
-      lastName: req.user.lastName,
-      email: req.user.email
-    }
-  });
-});
-
-// Delete user
-app.delete("/users/:email", async (req, res) => {
-  try {
-    const { email } = req.params;
-    const deletedUser = await User.findOneAndDelete({ email });
-    
-    if (!deletedUser) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found"
-      });
-    }
-    
-    res.json({
-      success: true,
-      message: "User successfully deleted"
-    });
-  } catch (error) {
-    res.status(400).json({
-      success: false,
-      error: error.message
-    });
-  }
-});
-
+// Base route
 app.get("/", (req, res) => {
   res.send("Hello Technigo!");
 });
 
+// Start server
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);
 });

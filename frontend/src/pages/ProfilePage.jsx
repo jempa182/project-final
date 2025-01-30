@@ -101,10 +101,6 @@ const ProfilePage = () => {
         <h2 className="text-xl mb-4">Preferences</h2>
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <span>Newsletter subscription</span>
-            <button className="text-sm text-black underline">Subscribe</button>
-          </div>
-          <div className="flex items-center justify-between">
             <span>Favorite prints</span>
             <Link to="/favorites" className="text-sm text-black underline">
               View favorites (0)
