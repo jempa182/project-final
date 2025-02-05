@@ -43,7 +43,7 @@ router.delete("/:email", async (req, res) => {
   }
 });
 
-// You could add more user routes here like:
+// Could add more user routes here like:
 // - PUT /users/profile (update profile)
 // - PUT /users/password (change password)
 // - GET /users/orders (get user's order history)

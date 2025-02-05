@@ -4,13 +4,15 @@ import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 
 const CartPage = () => {
+  // Get cart functionality from context
   const { cart, removeFromCart, updateQuantity } = useCart();
 
-  // Calculates totals
+  // Calculate order totals
   const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const shipping = cart.length > 0 ? 49 : 0; // Example shipping cost
+  const shipping = cart.length > 0 ? 49 : 0; // Only add shipping if cart has items
   const total = subtotal + shipping;
 
+  // Show empty cart message if no items
   if (cart.length === 0) {
     return (
       <div className="max-w-[1200px] mx-auto text-center py-16">
@@ -27,16 +29,18 @@ const CartPage = () => {
       <h1 className="text-2xl mb-8">Shopping Cart</h1>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {/* Cart Items List */}
+        {/* Left side: Cart Items */}
         <div className="md:col-span-2 space-y-4">
           {cart.map((item) => (
             <div key={item._id} className="flex gap-4 p-4 border">
+              {/* Product image */}
               <img 
                 src={item.mainImage}
                 alt={item.name}
                 className="w-24 h-24 object-cover"
               />
               <div className="flex-1">
+                {/* Product details and remove button */}
                 <div className="flex justify-between">
                   <h2>{item.name}</h2>
                   <button 
@@ -47,6 +51,7 @@ const CartPage = () => {
                   </button>
                 </div>
                 <p className="text-gray-600">{item.price} kr</p>
+                {/* Quantity controls */}
                 <div className="flex items-center gap-2 mt-2">
                   <button 
                     onClick={() => updateQuantity(item._id, Math.max(0, item.quantity - 1))}
@@ -67,10 +72,11 @@ const CartPage = () => {
           ))}
         </div>
 
-        {/* Order Summary */}
+        {/* Right side: Order Summary */}
         <div className="bg-gray-50 p-6 h-fit">
           <h2 className="text-xl mb-4">Order Summary</h2>
           <div className="space-y-2 mb-4">
+            {/* Price calculations */}
             <div className="flex justify-between">
               <span>Subtotal</span>
               <span>{subtotal} kr</span>
@@ -84,6 +90,7 @@ const CartPage = () => {
               <span>{total} kr</span>
             </div>
           </div>
+          {/* Checkout and continue shopping buttons */}
           <Link 
             to="/checkout"
             className="block w-full bg-black text-white py-3 hover:bg-gray-800 text-center transition-colors duration-200"

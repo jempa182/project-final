@@ -22,7 +22,7 @@ const Layout = ({ children }) => {
         <div className="container mx-auto px-4 sm:px-6 py-4 flex justify-between items-center">
           <Link to="/" className="text-xl">
             <img 
-              src="/assets/jenny-logo.png"
+              src="/assets/jenny-logo.gif"
               alt="Jenny Andersén"
               className="h-12 w-auto max-w-full"
             />

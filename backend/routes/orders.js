@@ -2,7 +2,7 @@
 import express from 'express';
 import Stripe from 'stripe';
 import { Order } from '../models/Order.js';
-import { authenticateUser } from '../middleware/auth.js';  // We'll create this middleware file next
+import { authenticateUser } from '../middleware/auth.js'; 
 
 const router = express.Router();
 const stripe = new Stripe('sk_test_51Qjh2QAo9otVE0iMVDhH43JhXiWLjz4fHD1EbAkkccnw0OObDymX92FxnojyB79LlcWEgVJRYGv2Qz2Kr87WFNMt00WNrDetDE');

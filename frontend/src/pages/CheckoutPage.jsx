@@ -1,34 +1,45 @@
 // src/pages/CheckoutPage.jsx
+
+// --- Required Imports ---
 import React, { useState, useEffect } from 'react';
+
+// Stripe-related imports for payment processing
 import { loadStripe } from '@stripe/stripe-js';
 import {
-  Elements,
-  PaymentElement,
-  useStripe,
-  useElements
+  Elements,         // Wrapper component for Stripe elements
+  PaymentElement,   // Pre-built Stripe payment form
+  useStripe,        // Hook to access Stripe functions
+  useElements       // Hook to access Stripe form elements
 } from '@stripe/react-stripe-js';
-import { useNavigate } from 'react-router-dom';
-import { useUser } from '../context/UserContext';
-import { useCart } from '../context/CartContext';
 
-// --- NEW STRIPE INITIALIZATION ---
+import { useNavigate } from 'react-router-dom';
+import { useUser } from '../context/UserContext';      // For user authentication state
+import { useCart } from '../context/CartContext';      // For shopping cart state
+
+// Initialize Stripe with our publishable key from environment variables
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
-// --- NEW PAYMENT FORM COMPONENT ---
+// --- Payment Form Component ---
+// Separate component that handles Stripe payment form and submission
 const PaymentForm = () => {
-  const stripe = useStripe();
-  const elements = useElements();
-  const [error, setError] = useState(null);
-  const [processing, setProcessing] = useState(false);
+  // Initialize Stripe hooks
+  const stripe = useStripe();         // For processing payments
+  const elements = useElements();      // For accessing form elements
+
+  // Local state for payment processing
+  const [error, setError] = useState(null);           // Store payment errors
+  const [processing, setProcessing] = useState(false); // Track payment processing state
   const navigate = useNavigate();
 
+  // Handle payment form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!stripe || !elements) return;
+    if (!stripe || !elements) return;  // Guard clause if Stripe isn't ready
 
-    setProcessing(true);
-    setError(null);
+    setProcessing(true);  // Start processing state
+    setError(null);       // Clear any previous errors
 
+    // Step 1: Submit the form data to Stripe
     const { error: submitError } = await elements.submit();
     if (submitError) {
       setError(submitError.message);
@@ -36,25 +47,31 @@ const PaymentForm = () => {
       return;
     }
 
+    // Step 2: Confirm the payment and handle redirect
     const { error: paymentError } = await stripe.confirmPayment({
       elements,
       confirmParams: {
+        // Redirect to order confirmation page after successful payment
         return_url: `${window.location.origin}/order-confirmation`,
       },
     });
 
+    // Handle any payment errors
     if (paymentError) {
       setError(paymentError.message);
     }
     setProcessing(false);
   };
 
+  // Render the Stripe payment form
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <PaymentElement />
+      <PaymentElement /> {/* Stripe's pre-built payment form */}
+      {/* Show error message if payment fails */}
       {error && (
         <div className="text-red-500 text-sm">{error}</div>
       )}
+      {/* Payment submit button with loading state */}
       <button
         type="submit"
         disabled={!stripe || processing}
@@ -68,10 +85,13 @@ const PaymentForm = () => {
   );
 };
 
-// Main CheckoutPage Component
+// --- Main CheckoutPage Component ---
 const CheckoutPage = () => {
-  const [step, setStep] = useState('initial');
-  const [email, setEmail] = useState('');
+  // --- State Management ---
+  // Control the multi-step checkout process
+  const [step, setStep] = useState('initial');         // Track current checkout step
+  const [email, setEmail] = useState('');             // Store email for guest checkout
+  // Comprehensive shipping information
   const [shippingInfo, setShippingInfo] = useState({
     firstName: '',
     lastName: '',
@@ -82,18 +102,21 @@ const CheckoutPage = () => {
     phone: ''
   });
   
+  // Store Stripe payment intent client secret
   const [clientSecret, setClientSecret] = useState('');
   
-  const { user } = useUser();  // Make sure this line exists
+  // Get user and cart data from context
+  const { user } = useUser();
   const { cart } = useCart();
   const navigate = useNavigate();
+  // Track if we should show login option for existing users
   const [showLoginChoice, setShowLoginChoice] = useState(false);
 
-  // Add this useEffect right after your state declarations
+  // --- Auto-fill Effect ---
+  // Pre-fill shipping info for logged-in users
   useEffect(() => {
     if (user) {
-      setStep('shipping');
-      // Optionally pre-fill shipping info if you have user's details
+      setStep('shipping');  // Skip email step for logged-in users
       if (user.firstName) {
         setShippingInfo(prevInfo => ({
           ...prevInfo,
@@ -105,13 +128,17 @@ const CheckoutPage = () => {
     }
   }, [user]);
 
+  // --- Calculate Order Totals ---
   const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const shipping = 49;
+  const shipping = 49;  // Fixed shipping cost
   const total = subtotal + shipping;
 
+  // --- Form Handlers ---
+  // Handle email form submission
   const handleEmailSubmit = async (e) => {
     e.preventDefault();
     try {
+      // Check if email exists in system
       const response = await fetch(`http://localhost:8080/auth/check-email`, {
         method: 'POST',
         headers: {
@@ -123,19 +150,20 @@ const CheckoutPage = () => {
       const data = await response.json();
       
       if (data.exists) {
-        setShowLoginChoice(true);
+        setShowLoginChoice(true);  // Show login option for existing users
       } else {
-        setStep('shipping');
+        setStep('shipping');       // Proceed to shipping for new users
       }
     } catch (error) {
       console.error('Error checking email:', error);
     }
   };
 
-  // --- UPDATED handleShippingSubmit with Stripe Integration ---
+  // Handle shipping form submission
   const handleShippingSubmit = async (e) => {
     e.preventDefault();
     try {
+      // Create payment intent on backend
       const response = await fetch('http://localhost:8080/orders/create-payment-intent', {
         method: 'POST',
         headers: {
@@ -150,19 +178,21 @@ const CheckoutPage = () => {
 
       const data = await response.json();
       if (data.clientSecret) {
-        setClientSecret(data.clientSecret);
-        setStep('payment');
+        setClientSecret(data.clientSecret);  // Store client secret for Stripe
+        setStep('payment');                  // Move to payment step
       }
     } catch (error) {
       console.error('Error creating payment:', error);
     }
   };
 
+  // --- UI Checkout Page ---
   return (
     <div className="max-w-4xl mx-auto">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {/* Main checkout form */}
+        {/* Main checkout form section */}
         <div className="md:col-span-2">
+          {/* Header with back button */}
           <div className="flex items-center mb-8">
             <h1 className="text-2xl">Checkout</h1>
             {step !== 'initial' && (
@@ -178,11 +208,12 @@ const CheckoutPage = () => {
             )}
           </div>
 
+          {/* Step 1: Email/Guest Choice */}
           {step === 'initial' && (
             <div className="bg-white p-6 border rounded-lg">
               <h2 className="text-xl mb-6">How would you like to check out?</h2>
               
-              {/* Login/Email section */}
+              {/* Email form section */}
               <div className="mb-8">
                 <h3 className="text-lg mb-4">Sign in or enter email</h3>
                 <form onSubmit={handleEmailSubmit} className="space-y-4">
@@ -207,7 +238,7 @@ const CheckoutPage = () => {
                 </form>
               </div>
 
-              {/* Guest checkout section */}
+              {/* Guest checkout option */}
               <div className="pt-6 border-t">
                 <h3 className="text-lg mb-4">Guest Checkout</h3>
                 <button
@@ -220,6 +251,7 @@ const CheckoutPage = () => {
             </div>
           )}
 
+          {/* Login choice popup for existing users */}
           {showLoginChoice && (
             <div className="bg-white p-6 border rounded-lg mt-4">
               <p className="mb-4">This email is already registered with us.</p>
@@ -245,10 +277,12 @@ const CheckoutPage = () => {
             </div>
           )}
 
+          {/* Step 2: Shipping Information Form */}
           {step === 'shipping' && (
             <div className="bg-white p-6 border rounded-lg">
               <h2 className="text-xl mb-4">Shipping Information</h2>
               <form onSubmit={handleShippingSubmit} className="space-y-4">
+                {/* Name fields */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium mb-1">
@@ -282,6 +316,7 @@ const CheckoutPage = () => {
                   </div>
                 </div>
 
+                {/* Address field */}
                 <div>
                   <label className="block text-sm font-medium mb-1">
                     Street Address
@@ -298,6 +333,7 @@ const CheckoutPage = () => {
                   />
                 </div>
 
+                {/* ZIP and City fields */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium mb-1">
@@ -331,6 +367,7 @@ const CheckoutPage = () => {
                   </div>
                 </div>
 
+                {/* Country field */}
                 <div>
                   <label className="block text-sm font-medium mb-1">
                     Country
@@ -347,6 +384,7 @@ const CheckoutPage = () => {
                   />
                 </div>
 
+                {/* Phone field */}
                 <div>
                   <label className="block text-sm font-medium mb-1">
                     Phone Number
@@ -363,6 +401,7 @@ const CheckoutPage = () => {
                   />
                 </div>
 
+                {/* Submit button */}
                 <button
                   type="submit"
                   className="w-full bg-black text-white py-2 rounded hover:bg-gray-800"
@@ -373,7 +412,7 @@ const CheckoutPage = () => {
             </div>
           )}
 
-          {/* --- NEW PAYMENT SECTION --- */}
+          {/* Step 3: Stripe Payment Form */}
           {step === 'payment' && clientSecret && (
             <div className="bg-white p-6 border rounded-lg">
               <h2 className="text-xl mb-4">Payment Information</h2>
@@ -395,40 +434,41 @@ const CheckoutPage = () => {
           )}
         </div>
 
-        {/* Order summary */}
+        {/* Order Summary Sidebar - Always visible */}
         <div className="bg-gray-50 p-6 rounded-lg h-fit">
           <h2 className="text-xl mb-4">Order Summary</h2>
           
+          {/* Cart Items List */}
           <div className="space-y-4 mb-4">
             {cart.map((item) => (
               <div key={item._id} className="flex justify-between">
-                <div>
-                  <p>{item.name}</p>
-                  <p className="text-sm text-gray-500">Quantity: {item.quantity}</p>
+                  <div>
+                    <p>{item.name}</p>
+                    <p className="text-sm text-gray-500">Quantity: {item.quantity}</p>
+                  </div>
+                  <p>{item.price * item.quantity} kr</p>
                 </div>
-                <p>{item.price * item.quantity} kr</p>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
 
-          <div className="border-t pt-4 space-y-2">
-            <div className="flex justify-between">
-              <span>Subtotal</span>
-              <span>{subtotal} kr</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Shipping</span>
-              <span>{shipping} kr</span>
-            </div>
-            <div className="flex justify-between font-medium text-lg pt-2 border-t">
-              <span>Total</span>
-              <span>{total} kr</span>
+            <div className="border-t pt-4 space-y-2">
+              <div className="flex justify-between">
+                <span>Subtotal</span>
+                <span>{subtotal} kr</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Shipping</span>
+                <span>{shipping} kr</span>
+              </div>
+              <div className="flex justify-between font-medium text-lg pt-2 border-t">
+                <span>Total</span>
+                <span>{total} kr</span>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  );
-};
+    );
+  };
 
-export default CheckoutPage;
+  export default CheckoutPage;

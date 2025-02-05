@@ -1,13 +1,33 @@
-// src/pages/FavoritesPage.jsx
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
+import { Heart } from 'lucide-react';
 
 const FavoritesPage = () => {
   const [favorites, setFavorites] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const { user } = useUser();
   const navigate = useNavigate();
+
+  // Function to toggle favorite status
+  const toggleFavorite = async (printId) => {
+    try {
+      const response = await fetch(`http://localhost:8080/favorites/${printId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+
+      if (response.ok) {
+        // Update the local favorites state by removing the unfavorited product
+        setFavorites((prevFavorites) => prevFavorites.filter((fav) => fav._id !== printId));
+      }
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+    }
+  };
 
   useEffect(() => {
     // Redirect to login if not authenticated
@@ -55,12 +75,8 @@ const FavoritesPage = () => {
       <h1 className="text-2xl mb-8">My Favorites</h1>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {favorites.map((print) => (
-          <Link 
-            to={`/products/${print._id}`} 
-            key={print._id} 
-            className="group"
-          >
-            <div className="space-y-4">
+          <div key={print._id} className="group space-y-4">
+            <Link to={`/products/${print._id}`}>
               <div className="aspect-square bg-gray-100 rounded-3xl overflow-hidden">
                 <img 
                   src={print.mainImage}
@@ -68,12 +84,18 @@ const FavoritesPage = () => {
                   className="w-full h-full object-cover"
                 />
               </div>
-              <div className="space-y-1">
-                <h2 className="text-gray-800">{print.name}</h2>
-                <p className="text-gray-800">{print.price} kr</p>
-              </div>
+            </Link>
+            <div className="space-y-1 flex justify-between items-center">
+              <h2 className="text-gray-800">{print.name}</h2>
+              <button
+                onClick={() => toggleFavorite(print._id)}
+                className="p-2 rounded-full bg-white shadow-md hover:scale-110 transition-transform"
+              >
+                <Heart className="w-5 h-5 fill-red-500 stroke-red-500" />
+              </button>
             </div>
-          </Link>
+            <p className="text-gray-800">{print.price} kr</p>
+          </div>
         ))}
       </div>
     </div>

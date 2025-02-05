@@ -1,6 +1,8 @@
 // backend/data/seedPrints.js
 import mongoose from 'mongoose';
 import { Print } from '../models/Print.js';
+import dotenv from 'dotenv';
+dotenv.config();
 
 const prints = [
   {
@@ -175,7 +177,7 @@ const prints = [
 ];
 
 // Connect to MongoDB
-mongoose.connect('mongodb+srv://jempa182:NjzFCota9q0e9Oy8@cluster0.1aoha.mongodb.net/project-mongodb?retryWrites=true&w=majority&appName=Cluster0')
+mongoose.connect(process.env.MONGO_URL)
   .then(async () => {
     console.log('Connected to MongoDB');
     

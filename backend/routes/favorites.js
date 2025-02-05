@@ -19,16 +19,10 @@ router.post("/:printId", authenticateUser, async (req, res) => {
     }
 
     await user.save();
-
-    res.json({
-      success: true,
-      favorites: user.favorites
-    });
+    res.json({ success: true, favorites: user.favorites });
   } catch (error) {
-    res.status(400).json({
-      success: false,
-      error: error.message
-    });
+    console.error('Error toggling favorite:', error);
+    res.status(400).json({ success: false, error: error.message });
   }
 });
 
