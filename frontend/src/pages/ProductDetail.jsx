@@ -28,7 +28,7 @@ const ProductDetail = () => {
   useEffect(() => {
     const fetchPrint = async () => {
       try {
-        const response = await fetch(`http://localhost:8080/prints/${id}`);
+        const response = await fetch(`https://jenny-a-artwork.onrender.com/prints/${id}`);
         const data = await response.json();
         if (data.success) {
           setPrint(data.print);
@@ -48,7 +48,7 @@ const ProductDetail = () => {
     const checkFavorite = async () => {
       if (user) {
         try {
-          const response = await fetch('http://localhost:8080/favorites', {
+          const response = await fetch('https://jenny-a-artwork.onrender.com/favorites', {
             headers: {
               'Authorization': `Bearer ${localStorage.getItem('token')}`
             }
@@ -72,7 +72,7 @@ const ProductDetail = () => {
     }
     
     try {
-      const response = await fetch(`http://localhost:8080/favorites/${id}`, {
+      const response = await fetch(`https://jenny-a-artwork.onrender.com/favorites/${id}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

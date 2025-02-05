@@ -55,7 +55,7 @@ const OrderConfirmationContent = () => {
 
   const fetchOrder = async (orderId) => {
     try {
-      const response = await fetch(`http://localhost:8080/orders/${orderId}`, {
+      const response = await fetch(`https://jenny-a-artwork.onrender.com/orders/${orderId}`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }

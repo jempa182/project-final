@@ -139,7 +139,7 @@ const CheckoutPage = () => {
     e.preventDefault();
     try {
       // Check if email exists in system
-      const response = await fetch(`http://localhost:8080/auth/check-email`, {
+      const response = await fetch(`https://jenny-a-artwork.onrender.com/auth/check-email`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -164,7 +164,7 @@ const CheckoutPage = () => {
     e.preventDefault();
     try {
       // Create payment intent on backend
-      const response = await fetch('http://localhost:8080/orders/create-payment-intent', {
+      const response = await fetch('https://jenny-a-artwork.onrender.com/orders/create-payment-intent', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

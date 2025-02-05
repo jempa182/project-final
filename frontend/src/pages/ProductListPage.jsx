@@ -41,7 +41,7 @@ const ProductListPage = () => {
   useEffect(() => {
     const fetchPrints = async () => {
       try {
-        const response = await fetch('http://localhost:8080/prints');
+        const response = await fetch('https://jenny-a-artwork.onrender.com/prints');
         const data = await response.json();
         if (data.success) {
           setPrints(data.prints);
@@ -62,7 +62,7 @@ const ProductListPage = () => {
       // Only attempt to fetch favorites if we have a logged-in user
       if (user) {
         try {
-          const response = await fetch('http://localhost:8080/favorites', {
+          const response = await fetch('https://jenny-a-artwork.onrender.com/favorites', {
             headers: {
               // Include auth token for protected route access
               'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -84,7 +84,7 @@ const ProductListPage = () => {
   // Function to toggle products as favorites
   const toggleFavorite = async (printId) => {
     try {
-      const response = await fetch(`http://localhost:8080/favorites/${printId}`, {
+      const response = await fetch(`https://jenny-a-artwork.onrender.com/favorites/${printId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -73,7 +73,7 @@ const CartPage = () => {
         </div>
 
         {/* Right side: Order Summary */}
-        <div className="bg-gray-50 p-6 h-fit">
+        <div className="bg-[#FFF9F0] p-6 h-fit">
           <h2 className="text-xl mb-4">Order Summary</h2>
           <div className="space-y-2 mb-4">
             {/* Price calculations */}
