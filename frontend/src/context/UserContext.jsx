@@ -13,7 +13,7 @@ export const UserProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const response = await fetch('http://localhost:8080/auth/login', {
+      const response = await fetch('https://jenny-a-artwork.onrender.com/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

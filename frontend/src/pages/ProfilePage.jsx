@@ -12,7 +12,7 @@ const ProfilePage = () => {
 
   const handleSaveAddress = async (address) => {
     try {
-      const response = await fetch('http://localhost:8080/user/address', {
+      const response = await fetch('https://jenny-a-artwork.onrender.com/user/address', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

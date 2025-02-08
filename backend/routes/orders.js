@@ -3,9 +3,12 @@ import express from 'express';
 import Stripe from 'stripe';
 import { Order } from '../models/Order.js';
 import { authenticateUser } from '../middleware/auth.js'; 
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const router = express.Router();
-const stripe = new Stripe('sk_test_51Qjh2QAo9otVE0iMVDhH43JhXiWLjz4fHD1EbAkkccnw0OObDymX92FxnojyB79LlcWEgVJRYGv2Qz2Kr87WFNMt00WNrDetDE');
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 // POST /orders/create-payment - Create payment intent and order
 router.post("/create-payment-intent", authenticateUser, async (req, res) => {

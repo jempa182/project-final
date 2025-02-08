@@ -12,7 +12,7 @@ const FavoritesPage = () => {
   // Function to toggle favorite status
   const toggleFavorite = async (printId) => {
     try {
-      const response = await fetch(`http://localhost:8080/favorites/${printId}`, {
+      const response = await fetch(`https://jenny-a-artwork.onrender.com/favorites/${printId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -38,7 +38,7 @@ const FavoritesPage = () => {
 
     const fetchFavorites = async () => {
       try {
-        const response = await fetch('http://localhost:8080/favorites', {
+        const response = await fetch('https://jenny-a-artwork.onrender.com/favorites', {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
           }
