@@ -1,19 +1,39 @@
 // src/pages/CartPage.jsx
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 
 const CartPage = () => {
-  // Get cart functionality from context
   const { cart, removeFromCart, updateQuantity } = useCart();
+  
+  // When quantity is updated to 0, remove the item
+  useEffect(() => {
+    cart.forEach(item => {
+      if (item.quantity === 0) {
+        removeFromCart(item._id);
+      }
+    });
+  }, [cart, removeFromCart]);
 
-  // Calculate order totals
-  const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const shipping = cart.length > 0 ? 49 : 0; // Only add shipping if cart has items
+  // Filter out items with quantity 0
+  const validCartItems = cart.filter(item => item.quantity > 0);
+  
+  // Calculates totals based on valid items only
+  const subtotal = validCartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const shipping = validCartItems.length > 0 ? 49 : 0; // No shipping if no items
   const total = subtotal + shipping;
+  
+  const handleQuantityChange = (itemId, newQuantity) => {
+    if (newQuantity === 0) {
+      // If new quantity is 0, immediately remove the item
+      removeFromCart(itemId);
+    } else {
+      // Otherwise update quantity normally
+      updateQuantity(itemId, newQuantity);
+    }
+  };
 
-  // Show empty cart message if no items
-  if (cart.length === 0) {
+  if (validCartItems.length === 0) {
     return (
       <div className="max-w-[1200px] mx-auto text-center py-16">
         <h1 className="text-2xl mb-4">Your cart is empty</h1>
@@ -29,18 +49,16 @@ const CartPage = () => {
       <h1 className="text-2xl mb-8">Shopping Cart</h1>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {/* Left side: Cart Items */}
+        {/* Cart Items List */}
         <div className="md:col-span-2 space-y-4">
-          {cart.map((item) => (
+          {validCartItems.map((item) => (
             <div key={item._id} className="flex gap-4 p-4 border">
-              {/* Product image */}
               <img 
                 src={item.mainImage}
                 alt={item.name}
                 className="w-24 h-24 object-cover"
               />
               <div className="flex-1">
-                {/* Product details and remove button */}
                 <div className="flex justify-between">
                   <h2>{item.name}</h2>
                   <button 
@@ -51,17 +69,16 @@ const CartPage = () => {
                   </button>
                 </div>
                 <p className="text-gray-600">{item.price} kr</p>
-                {/* Quantity controls */}
                 <div className="flex items-center gap-2 mt-2">
                   <button 
-                    onClick={() => updateQuantity(item._id, Math.max(0, item.quantity - 1))}
+                    onClick={() => handleQuantityChange(item._id, Math.max(0, item.quantity - 1))}
                     className="px-2 border hover:bg-gray-100"
                   >
                     -
                   </button>
                   <span>{item.quantity}</span>
                   <button 
-                    onClick={() => updateQuantity(item._id, item.quantity + 1)}
+                    onClick={() => handleQuantityChange(item._id, item.quantity + 1)}
                     className="px-2 border hover:bg-gray-100"
                   >
                     +
@@ -72,11 +89,10 @@ const CartPage = () => {
           ))}
         </div>
 
-        {/* Right side: Order Summary */}
-        <div className="bg-[#FFF9F0] p-6 h-fit">
+        {/* Order Summary */}
+        <div className="bg-gray-50 p-6 h-fit">
           <h2 className="text-xl mb-4">Order Summary</h2>
           <div className="space-y-2 mb-4">
-            {/* Price calculations */}
             <div className="flex justify-between">
               <span>Subtotal</span>
               <span>{subtotal} kr</span>
@@ -90,13 +106,21 @@ const CartPage = () => {
               <span>{total} kr</span>
             </div>
           </div>
-          {/* Checkout and continue shopping buttons */}
-          <Link 
-            to="/checkout"
-            className="block w-full bg-black text-white py-3 hover:bg-gray-800 text-center transition-colors duration-200"
-          >
-            PROCEED TO CHECKOUT
-          </Link>
+          {validCartItems.length > 0 ? (
+            <Link 
+              to="/checkout"
+              className="block w-full bg-black text-white py-3 hover:bg-gray-800 text-center transition-colors duration-200"
+            >
+              PROCEED TO CHECKOUT
+            </Link>
+          ) : (
+            <button 
+              disabled
+              className="block w-full bg-gray-400 text-white py-3 cursor-not-allowed"
+            >
+              CART EMPTY
+            </button>
+          )}
           <Link 
             to="/" 
             className="block text-center mt-4 text-gray-600 hover:text-black"
