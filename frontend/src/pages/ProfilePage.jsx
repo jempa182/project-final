@@ -1,14 +1,36 @@
 // src/pages/ProfilePage.jsx
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
-import { useState } from 'react';
 import AddressForm from '../components/AddressForm';
 
 const ProfilePage = () => {
-
   const { user, updateUser } = useUser();
   const [showAddressForm, setShowAddressForm] = useState(false);
+  const [favoritesCount, setFavoritesCount] = useState(0);
+
+  // Fetch favorites count when component mounts
+  useEffect(() => {
+    const fetchFavoritesCount = async () => {
+      if (user) {
+        try {
+          const response = await fetch('https://jenny-a-artwork.onrender.com/favorites', {
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+          });
+          const data = await response.json();
+          if (data.success) {
+            setFavoritesCount(data.favorites.length);
+          }
+        } catch (error) {
+          console.error('Error fetching favorites count:', error);
+        }
+      }
+    };
+
+    fetchFavoritesCount();
+  }, [user]);
 
   const handleSaveAddress = async (address) => {
     try {
@@ -103,7 +125,7 @@ const ProfilePage = () => {
           <div className="flex items-center justify-between">
             <span>Favorite prints</span>
             <Link to="/favorites" className="text-sm text-black underline">
-              View favorites (0)
+              View favorites ({favoritesCount})
             </Link>
           </div>
         </div>
