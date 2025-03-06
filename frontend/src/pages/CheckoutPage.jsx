@@ -100,11 +100,21 @@ const PaymentForm = () => {
       console.log("Payment result:", result); // Add this logging
 
       if (result.error) {
-        console.error("Payment error:", result.error); // Add this logging
+        console.error("Payment error:", result.error);
         setError(result.error.message);
       } else if (result.paymentIntent && result.paymentIntent.status === 'succeeded') {
-        console.log("Payment succeeded!"); // Add this logging
+        console.log("Payment succeeded! Redirecting to confirmation page...");
+        // Try multiple approaches to ensure navigation works
+        setProcessing(false); // First, stop the processing state
+        
+        // Method 1: Use navigate function
         navigate('/order-confirmation');
+        
+        // Method 2: Direct window location as fallback
+        setTimeout(() => {
+          console.log("Fallback navigation triggered");
+          window.location.href = `${window.location.origin}/order-confirmation`;
+        }, 1000);
       }
     } catch (err) {
       console.error("Unexpected error during payment:", err); // Add this logging
