@@ -8,7 +8,19 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const router = express.Router();
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
+// Initialize Stripe with error handling
+let stripe;
+try {
+  if (!process.env.STRIPE_SECRET_KEY) {
+    console.error('ERROR: STRIPE_SECRET_KEY is not set!');
+  } else {
+    stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+    console.log('Stripe initialized successfully');
+  }
+} catch (error) {
+  console.error('Error initializing Stripe:', error);
+}
 
 // POST /orders/create-payment - Create payment intent and order
 router.post("/create-payment-intent", authenticateUser, async (req, res) => {
