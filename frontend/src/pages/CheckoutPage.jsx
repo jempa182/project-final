@@ -39,61 +39,88 @@ console.log("Stripe initialized:", Boolean(stripePromise));
 // Separate component that handles Stripe payment form and submission
 const PaymentForm = () => {
   // Initialize Stripe hooks
-  const stripe = useStripe();         // For processing payments
-  const elements = useElements();      // For accessing form elements
+  const stripe = useStripe();
+  const elements = useElements();
 
   // Local state for payment processing
-  const [error, setError] = useState(null);           // Store payment errors
-  const [processing, setProcessing] = useState(false); // Track payment processing state
+  const [error, setError] = useState(null);
+  const [processing, setProcessing] = useState(false);
   const navigate = useNavigate();
+
+  // Add debugging logs for Stripe readiness
+  useEffect(() => {
+    console.log("Stripe available:", Boolean(stripe));
+    console.log("Elements available:", Boolean(elements));
+  }, [stripe, elements]);
 
   // Handle payment form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!stripe || !elements) return;  // Guard clause if Stripe isn't ready
-
-    setProcessing(true);  // Start processing state
-    setError(null);       // Clear any previous errors
-
-    // Step 1: Submit the form data to Stripe
-    const { error: submitError } = await elements.submit();
-    if (submitError) {
-      setError(submitError.message);
-      setProcessing(false);
+    console.log("Payment form submitted"); // Add this logging
+    
+    if (!stripe || !elements) {
+      console.error("Stripe or Elements not available"); // Add this logging
       return;
     }
 
-    // Step 2: Confirm the payment and handle redirect
-    const { error: paymentError } = await stripe.confirmPayment({
-      elements,
-      confirmParams: {
-        // Redirect to order confirmation page after successful payment
-        return_url: `${window.location.origin}/order-confirmation`,
-      },
-    });
+    setProcessing(true);
+    setError(null);
+    console.log("Processing payment..."); // Add this logging
 
-    // Handle any payment errors
-    if (paymentError) {
-      setError(paymentError.message);
+    try { // Add try/catch block
+      // Step 1: Submit the form data to Stripe
+      console.log("Submitting form data to Stripe"); // Add this logging
+      const { error: submitError } = await elements.submit();
+      if (submitError) {
+        console.error("Form submission error:", submitError); // Add this logging
+        setError(submitError.message);
+        setProcessing(false);
+        return;
+      }
+      console.log("Form data submitted successfully"); // Add this logging
+
+      // Step 2: Confirm the payment and handle redirect
+      console.log("Confirming payment"); // Add this logging
+      const result = await stripe.confirmPayment({
+        elements,
+        confirmParams: {
+          // Redirect to order confirmation page after successful payment
+          return_url: `${window.location.origin}/order-confirmation`,
+        },
+        redirect: 'if_required', // Add this option
+      });
+      
+      console.log("Payment result:", result); // Add this logging
+
+      if (result.error) {
+        console.error("Payment error:", result.error); // Add this logging
+        setError(result.error.message);
+      } else if (result.paymentIntent && result.paymentIntent.status === 'succeeded') {
+        console.log("Payment succeeded!"); // Add this logging
+        navigate('/order-confirmation');
+      }
+    } catch (err) {
+      console.error("Unexpected error during payment:", err); // Add this logging
+      setError("An unexpected error occurred. Please try again.");
     }
+
     setProcessing(false);
   };
 
   // Render the Stripe payment form
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <PaymentElement /> {/* Stripe's pre-built payment form */}
-      {/* Show error message if payment fails */}
+      <PaymentElement />
       {error && (
         <div className="text-red-500 text-sm">{error}</div>
       )}
-      {/* Payment submit button with loading state */}
       <button
         type="submit"
         disabled={!stripe || processing}
         className={`w-full bg-black text-white py-3 rounded ${
           processing ? 'opacity-50' : 'hover:bg-gray-800'
         }`}
+        onClick={() => console.log("Pay Now button clicked")} // Add this logging
       >
         {processing ? 'Processing...' : 'Pay Now'}
       </button>
