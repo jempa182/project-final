@@ -492,26 +492,38 @@ const CheckoutPage = () => {
             </div>
           )}
 
-          {/* Step 3: Stripe Payment Form */}
-          {step === 'payment' && clientSecret && (
-            <div className="bg-white p-6 border rounded-lg">
-              <h2 className="text-xl mb-4">Payment Information</h2>
-              <Elements 
-                stripe={stripePromise} 
-                options={{
-                  clientSecret,
-                  appearance: {
-                    theme: 'stripe',
-                    variables: {
-                      colorPrimary: '#000000',
-                    },
+        {/* Step 3: Stripe Payment Form */}
+        {step === 'payment' && clientSecret && stripePromise && (
+          <div className="bg-white p-6 border rounded-lg">
+            <h2 className="text-xl mb-4">Payment Information</h2>
+            <Elements 
+              stripe={stripePromise} 
+              options={{
+                clientSecret,
+                appearance: {
+                  theme: 'stripe',
+                  variables: {
+                    colorPrimary: '#000000',
                   },
-                }}
-              >
-                <PaymentForm />
-              </Elements>
+                },
+              }}
+            >
+              <PaymentForm />
+            </Elements>
+          </div>
+        )}
+        {step === 'payment' && (!stripePromise || !clientSecret) && (
+          <div className="bg-white p-6 border rounded-lg">
+            <h2 className="text-xl mb-4">Payment Information</h2>
+            <div className="p-4 bg-red-50 border border-red-200 rounded text-red-600">
+              <p>Unable to initialize payment form. Please try again later.</p>
+              <p className="mt-2 text-sm">
+                {!stripePromise && "Stripe could not be initialized."}
+                {!clientSecret && "Payment intent could not be created."}
+              </p>
             </div>
-          )}
+          </div>
+        )}
         </div>
 
         {/* Order Summary Sidebar - Always visible */}
