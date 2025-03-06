@@ -7,14 +7,14 @@ dotenv.config();
 
 // Database configuration
 const config = {
-  url: process.env.MONGODB_URL || "mongodb://localhost/final-project"
+  url: process.env.MONGO_URL || "mongodb://localhost/final-project"
 };
 
 // Connect to MongoDB
 export const connectToDatabase = async () => {
   try {
-    if (!process.env.MONGODB_URL) {
-      console.warn('Warning: MONGODB_URL not found in environment variables');
+    if (!process.env.MONGO_URL) {
+      console.warn('Warning: MONGO_URL not found in environment variables');
     }
     
     await mongoose.connect(config.url);
