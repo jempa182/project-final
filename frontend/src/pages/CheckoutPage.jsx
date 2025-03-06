@@ -163,16 +163,30 @@ const CheckoutPage = () => {
   const handleShippingSubmit = async (e) => {
     e.preventDefault();
     try {
+      // Determine which endpoint to use based on authentication status
+      const endpoint = user 
+        ? 'https://jenny-a-artwork.onrender.com/orders/create-payment-intent'
+        : 'https://jenny-a-artwork.onrender.com/orders/create-guest-payment-intent';
+      
+      // Set up headers, only include Authorization if user is logged in
+      const headers = {
+        'Content-Type': 'application/json',
+      };
+      
+      if (user) {
+        headers['Authorization'] = `Bearer ${localStorage.getItem('token')}`;
+      }
+      
       // Create payment intent on backend
-      const response = await fetch('https://jenny-a-artwork.onrender.com/orders/create-payment-intent', {
+      const response = await fetch(endpoint, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        },
+        headers,
         body: JSON.stringify({
           items: cart,
-          shippingAddress: shippingInfo,
+          shippingAddress: {
+            ...shippingInfo,
+            email: email || shippingInfo.email, // Include email for guest orders
+          },
         }),
       });
 
@@ -316,6 +330,22 @@ const CheckoutPage = () => {
                   </div>
                 </div>
 
+                {/* Email field for guest users */}
+                {!user && (
+                  <div>
+                    <label className="block text-sm font-medium mb-1">
+                      Email
+                    </label>
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="w-full p-2 border rounded"
+                      required
+                    />
+                  </div>
+                )}
+
                 {/* Address field */}
                 <div>
                   <label className="block text-sm font-medium mb-1">
@@ -442,33 +472,33 @@ const CheckoutPage = () => {
           <div className="space-y-4 mb-4">
             {cart.map((item) => (
               <div key={item._id} className="flex justify-between">
-                  <div>
-                    <p>{item.name}</p>
-                    <p className="text-sm text-gray-500">Quantity: {item.quantity}</p>
-                  </div>
-                  <p>{item.price * item.quantity} kr</p>
+                <div>
+                  <p>{item.name}</p>
+                  <p className="text-sm text-gray-500">Quantity: {item.quantity}</p>
                 </div>
-              ))}
-            </div>
+                <p>{item.price * item.quantity} kr</p>
+              </div>
+            ))}
+          </div>
 
-            <div className="border-t pt-4 space-y-2">
-              <div className="flex justify-between">
-                <span>Subtotal</span>
-                <span>{subtotal} kr</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Shipping</span>
-                <span>{shipping} kr</span>
-              </div>
-              <div className="flex justify-between font-medium text-lg pt-2 border-t">
-                <span>Total</span>
-                <span>{total} kr</span>
-              </div>
+          <div className="border-t pt-4 space-y-2">
+            <div className="flex justify-between">
+              <span>Subtotal</span>
+              <span>{subtotal} kr</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Shipping</span>
+              <span>{shipping} kr</span>
+            </div>
+            <div className="flex justify-between font-medium text-lg pt-2 border-t">
+              <span>Total</span>
+              <span>{total} kr</span>
             </div>
           </div>
         </div>
       </div>
-    );
-  };
+    </div>
+  );
+};
 
-  export default CheckoutPage;
+export default CheckoutPage;

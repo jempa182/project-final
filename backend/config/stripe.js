@@ -1,16 +1,29 @@
 // config/stripe.js
 import Stripe from 'stripe';
+import dotenv from 'dotenv';
+
+// Load environment variables
+dotenv.config();
 
 // Stripe configuration
 const config = {
-  // Added comment to remind about moving to .env
-  secretKey: process.env.STRIPE_SECRET_KEY || 'sk_test_51Qjh2QAo9otVE0iMVDhH43JhXiWLjz4fHD1EbAkkccnw0OObDymX92FxnojyB79LlcWEgVJRYGv2Qz2Kr87WFNMt00WNrDetDE',
-  webhookSecret: process.env.STRIPE_WEBHOOK_SECRET || 'whsec_edf4e79bb58330085a6aefab4154850f9ead6ef724a21e78f3cae338488b58c8',
+  secretKey: process.env.STRIPE_SECRET_KEY,
+  webhookSecret: process.env.STRIPE_WEBHOOK_SECRET,
   currency: 'sek',
   shipping: {
     cost: 49,  // Default shipping cost
   }
 };
+
+// Check for required environment variables
+if (!process.env.STRIPE_SECRET_KEY) {
+  console.error('Error: STRIPE_SECRET_KEY not found in environment variables');
+  process.exit(1);
+}
+
+if (!process.env.STRIPE_WEBHOOK_SECRET) {
+  console.warn('Warning: STRIPE_WEBHOOK_SECRET not found in environment variables');
+}
 
 // Initialize Stripe
 export const stripe = new Stripe(config.secretKey);

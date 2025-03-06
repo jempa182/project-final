@@ -1,16 +1,23 @@
 // config/database.js
 import mongoose from 'mongoose';
+import dotenv from 'dotenv';
+
+// Load environment variables
+dotenv.config();
 
 // Database configuration
 const config = {
-  // Added comment to remind about moving to .env
-  url: process.env.MONGODB_URL || "mongodb+srv://jempa182:NjzFCota9q0e9Oy8@cluster0.1aoha.mongodb.net/project-mongodb?retryWrites=true&w=majority&appName=Cluster0"
+  url: process.env.MONGODB_URL || "mongodb://localhost/final-project"
 };
 
 // Connect to MongoDB
 export const connectToDatabase = async () => {
   try {
-    await mongoose.connect(config.url, config.options);
+    if (!process.env.MONGODB_URL) {
+      console.warn('Warning: MONGODB_URL not found in environment variables');
+    }
+    
+    await mongoose.connect(config.url);
     console.log('Successfully connected to MongoDB.');
   } catch (error) {
     console.error('Error connecting to MongoDB:', error);
