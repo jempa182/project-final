@@ -16,8 +16,24 @@ import { useNavigate } from 'react-router-dom';
 import { useUser } from '../context/UserContext';      // For user authentication state
 import { useCart } from '../context/CartContext';      // For shopping cart state
 
-// Initialize Stripe with our publishable key from environment variables
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
+// Initialize Stripe with error handling
+let stripePromise;
+try {
+  const key = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
+  // Remove any quotes that might be in the key
+  const cleanKey = key ? key.replace(/^"|"$/g, '') : null;
+  
+  if (!cleanKey) {
+    console.error("Stripe publishable key is missing!");
+  } else {
+    console.log("Initializing Stripe with key:", cleanKey.substring(0, 8) + "...");
+    stripePromise = loadStripe(cleanKey);
+  }
+} catch (error) {
+  console.error("Error initializing Stripe:", error);
+}
+// Check if initialization was successful
+console.log("Stripe initialized:", Boolean(stripePromise));
 
 // --- Payment Form Component ---
 // Separate component that handles Stripe payment form and submission
