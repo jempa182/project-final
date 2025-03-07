@@ -55,11 +55,18 @@ const OrderConfirmationContent = () => {
 
   const fetchOrder = async (orderId) => {
     try {
-      const response = await fetch(`https://jenny-a-artwork.onrender.com/orders/${orderId}`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
+      const token = localStorage.getItem('token');
+      const endpoint = token 
+        ? `https://jenny-a-artwork.onrender.com/orders/${orderId}`
+        : `https://jenny-a-artwork.onrender.com/orders/guest/${orderId}`;
+      
+      const headers = { 'Content-Type': 'application/json' };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      
+      const response = await fetch(endpoint, { headers });
+      
       const data = await response.json();
       if (data.success) {
         setOrder(data.order);
