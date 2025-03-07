@@ -90,11 +90,11 @@ const PaymentForm = () => {
       console.log("Confirming payment"); // Add this logging
       const result = await stripe.confirmPayment({
         elements,
+        redirect: 'always',
         confirmParams: {
-          // Redirect to order confirmation page after successful payment
+          // Pass payment_intent_id in URL so we can retrieve it later
           return_url: `${window.location.origin}/order-confirmation`,
-        },
-        redirect: 'if_required', // Add this option
+        }
       });
       
       console.log("Payment result:", result); // Add this logging
