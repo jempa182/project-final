@@ -16,29 +16,19 @@ import { useNavigate } from 'react-router-dom';
 import { useUser } from '../context/UserContext';      // For user authentication state
 import { useCart } from '../context/CartContext';      // For shopping cart state
 
-// Initialize Stripe with error handling and fallback
+// Initialize Stripe
 let stripePromise;
 try {
   const key = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
-  console.log("Raw key value:", key); // Debug the raw value
-  
-  // Remove any quotes that might be in the key
-  const cleanKey = key ? key.replace(/^"|"$/g, '') : null;
-  console.log("Clean key available:", Boolean(cleanKey));
-  
-  if (!cleanKey) {
-    console.error("Stripe publishable key is missing!");
-    // Fallback for testing only - REMOVE THIS IN PRODUCTION
-    const fallbackKey = 'pk_test_51Qjh2QAo9otVE0iMYYmsBgqHaszpuX55rP0dZogLIIGirGc75LOYT3DVx1v65qB6BCS576mJDzpL1csAsCK9DT4b00I4V8s9T3';
-    console.log("Using fallback key for testing");
-    stripePromise = loadStripe(fallbackKey);
+  if (key) {
+    stripePromise = loadStripe(key);
   } else {
-    console.log("Initializing Stripe with key:", cleanKey.substring(0, 8) + "...");
-    stripePromise = loadStripe(cleanKey);
+    console.error("Stripe publishable key is missing!");
   }
 } catch (error) {
   console.error("Error initializing Stripe:", error);
 }
+
 // Check if initialization was successful
 console.log("Stripe initialized:", Boolean(stripePromise));
 

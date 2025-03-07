@@ -164,13 +164,6 @@ const OrderConfirmationContent = () => {
             >
               Continue Shopping
             </button>
-
-            <button 
-              onClick={() => navigate('/order-confirmation')} 
-              className="mt-4 bg-gray-200 px-4 py-2 rounded"
-            >
-              Test Navigation
-            </button>
           </div>
         </div>
       )}
