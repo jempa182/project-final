@@ -53,31 +53,31 @@ const PaymentForm = () => {
   // Handle payment form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Payment form submitted"); // Add this logging
+    console.log("Payment form submitted"); 
     
     if (!stripe || !elements) {
-      console.error("Stripe or Elements not available"); // Add this logging
+      console.error("Stripe or Elements not available"); 
       return;
     }
 
     setProcessing(true);
     setError(null);
-    console.log("Processing payment..."); // Add this logging
+    console.log("Processing payment..."); 
 
     try { // Add try/catch block
       // Step 1: Submit the form data to Stripe
-      console.log("Submitting form data to Stripe"); // Add this logging
+      console.log("Submitting form data to Stripe"); 
       const { error: submitError } = await elements.submit();
       if (submitError) {
-        console.error("Form submission error:", submitError); // Add this logging
+        console.error("Form submission error:", submitError); 
         setError(submitError.message);
         setProcessing(false);
         return;
       }
-      console.log("Form data submitted successfully"); // Add this logging
+      console.log("Form data submitted successfully"); 
 
       // Step 2: Confirm the payment and handle redirect
-      console.log("Confirming payment"); // Add this logging
+      console.log("Confirming payment"); 
       const result = await stripe.confirmPayment({
         elements,
         redirect: 'always',
@@ -87,7 +87,7 @@ const PaymentForm = () => {
         }
       });
       
-      console.log("Payment result:", result); // Add this logging
+      console.log("Payment result:", result); 
 
       if (result.error) {
         console.error("Payment error:", result.error);
@@ -107,7 +107,7 @@ const PaymentForm = () => {
         }, 1000);
       }
     } catch (err) {
-      console.error("Unexpected error during payment:", err); // Add this logging
+      console.error("Unexpected error during payment:", err); 
       setError("An unexpected error occurred. Please try again.");
     }
 
@@ -127,7 +127,7 @@ const PaymentForm = () => {
         className={`w-full bg-black text-white py-3 rounded ${
           processing ? 'opacity-50' : 'hover:bg-gray-800'
         }`}
-        onClick={() => console.log("Pay Now button clicked")} // Add this logging
+        onClick={() => console.log("Pay Now button clicked")} 
       >
         {processing ? 'Processing...' : 'Pay Now'}
       </button>
